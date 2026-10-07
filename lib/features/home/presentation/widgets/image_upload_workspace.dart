@@ -8,16 +8,14 @@ import '../../../../core/widgets/gradient_button.dart';
 class ImageUploadWorkspace extends StatelessWidget {
   const ImageUploadWorkspace({
     required this.imageBytes,
-    required this.isLoading,
     required this.onPickImage,
-    required this.onRemoveBackground,
+    required this.onOpenEditor,
     super.key,
   });
 
   final Uint8List? imageBytes;
-  final bool isLoading;
   final VoidCallback onPickImage;
-  final VoidCallback onRemoveBackground;
+  final VoidCallback onOpenEditor;
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +30,13 @@ class ImageUploadWorkspace extends StatelessWidget {
         ),
       ),
       child: imageBytes == null
-          ? _EmptyState(onPickImage: onPickImage)
+          ? _EmptyState(
+              onPickImage: onPickImage,
+            )
           : _SelectedState(
               imageBytes: imageBytes!,
-              isLoading: isLoading,
               onPickImage: onPickImage,
-              onRemoveBackground: onRemoveBackground,
+              onOpenEditor: onOpenEditor,
             ),
     );
   }
@@ -100,15 +99,13 @@ class _EmptyState extends StatelessWidget {
 class _SelectedState extends StatelessWidget {
   const _SelectedState({
     required this.imageBytes,
-    required this.isLoading,
     required this.onPickImage,
-    required this.onRemoveBackground,
+    required this.onOpenEditor,
   });
 
   final Uint8List imageBytes;
-  final bool isLoading;
   final VoidCallback onPickImage;
-  final VoidCallback onRemoveBackground;
+  final VoidCallback onOpenEditor;
 
   @override
   Widget build(BuildContext context) {
@@ -120,14 +117,10 @@ class _SelectedState extends StatelessWidget {
             aspectRatio: 1,
             child: Container(
               color: AppTheme.surfaceElevated,
-              child: isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : Image.memory(
-                      imageBytes,
-                      fit: BoxFit.contain,
-                    ),
+              child: Image.memory(
+                imageBytes,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ),
@@ -135,19 +128,16 @@ class _SelectedState extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: GradientButton(
-            label: isLoading
-                ? 'Removing Background...'
-                : 'Remove Background',
+            label: 'Open Editor',
             icon: Icons.auto_fix_high,
-            isLoading: isLoading,
-            onPressed: onRemoveBackground,
+            onPressed: onOpenEditor,
           ),
         ),
         const SizedBox(height: 10),
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: isLoading ? null : onPickImage,
+            onPressed: onPickImage,
             icon: const Icon(Icons.swap_horiz),
             label: const Text('Choose Another Image'),
           ),

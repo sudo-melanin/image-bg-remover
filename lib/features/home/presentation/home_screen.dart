@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:bg_remover/features/editor/presentation/editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -22,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
       BackgroundRemovalService();
 
   Uint8List? _imageBytes;
-  bool _isLoading = false;
 
   Future<void> _pickImage() async {
     final image = await _imagePicker.pickImage(
@@ -38,39 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _removeBackground() async {
-    if (_imageBytes == null) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final result = await _removalService.removeBackground(
-        _imageBytes!,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        _imageBytes = Uint8List.fromList(result);
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not remove the background.'),
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 20),
               ImageUploadWorkspace(
                 imageBytes: _imageBytes,
-                isLoading: _isLoading,
                 onPickImage: _pickImage,
-                onRemoveBackground: _removeBackground,
+                onOpenEditor: _openEditor,
               ),
               const SizedBox(height: 28),
               const RecentCreationsSection(),
@@ -99,4 +65,29 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  Future<void> _openEditor() async {
+  if (_imageBytes == null) return;
+
+  final result = await Navigator.of(context).push<Uint8List>(
+    MaterialPageRoute(
+      builder: (_) => EditorScreen(
+        imageBytes: _imageBytes!,
+        onRemoveBackground: () async {
+          final result = await _removalService.removeBackground(
+            _imageBytes!,
+          );
+
+          return Uint8List.fromList(result);
+        },
+      ),
+    ),
+  );
+
+  if (!mounted || result == null) return;
+
+  setState(() {
+    _imageBytes = result;
+  });
+}
 }
