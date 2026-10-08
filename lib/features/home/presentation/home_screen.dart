@@ -1,10 +1,13 @@
+
 import 'dart:typed_data';
 
-import 'package:bg_remover/features/editor/presentation/editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../services/background_removal/background_removal_service.dart';
+import '../../../services/media/recent_creations_storage.dart';
+import '../../editor/presentation/editor_screen.dart';
+import '../domain/recent_creation.dart';
 import 'widgets/home_top_bar.dart';
 import 'widgets/image_upload_workspace.dart';
 import 'widgets/recent_creations_section.dart';
@@ -19,10 +22,70 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ImagePicker _imagePicker = ImagePicker();
+
   final BackgroundRemovalService _removalService =
       BackgroundRemovalService();
 
+  final RecentCreationsStorage _storage =
+      RecentCreationsStorage();
+
+  final List<RecentCreation> _recentCreations = [];
+
   Uint8List? _imageBytes;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecentCreations();
+  }
+
+  Future<void> _loadRecentCreations() async {
+    try {
+      final creations = await _storage.loadAll();
+
+      if (!mounted) return;
+
+      setState(() {
+        _recentCreations
+          ..clear()
+          ..addAll(creations);
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not load recent creations.'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _persistRecentCreations() async {
+    try {
+      final creations = await _storage.saveAll(
+        List<RecentCreation>.of(_recentCreations),
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _recentCreations
+          ..clear()
+          ..addAll(creations);
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not save recent creations on this device.',
+          ),
+        ),
+      );
+    }
+  }
 
   Future<void> _pickImage() async {
     final image = await _imagePicker.pickImage(
@@ -33,11 +96,79 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final bytes = await image.readAsBytes();
 
+    if (!mounted) return;
+
     setState(() {
       _imageBytes = bytes;
     });
   }
 
+  Future<void> _openEditor() async {
+    if (_imageBytes == null) return;
+
+    final originalBytes = _imageBytes!;
+
+    final result = await Navigator.of(context).push<RecentCreation>(
+      MaterialPageRoute(
+        builder: (_) => EditorScreen(
+          imageBytes: originalBytes,
+          onRemoveBackground: () async {
+            final bytes = await _removalService.removeBackground(
+              originalBytes,
+            );
+
+            return Uint8List.fromList(bytes);
+          },
+        ),
+      ),
+    );
+
+    if (!mounted || result == null) return;
+
+    setState(() {
+      _imageBytes = result.imageBytes;
+      _recentCreations.insert(0, result);
+    });
+
+    await _persistRecentCreations();
+  }
+
+  Future<void> _openRecentCreation(
+    RecentCreation creation,
+  ) async {
+    final result = await Navigator.of(context).push<RecentCreation>(
+      MaterialPageRoute(
+        builder: (_) => EditorScreen(
+          imageBytes: creation.imageBytes,
+          isProcessed: true,
+          initialBackdrop: creation.backdrop,
+          onRemoveBackground: () async {
+            final bytes = await _removalService.removeBackground(
+              creation.imageBytes,
+            );
+
+            return Uint8List.fromList(bytes);
+          },
+        ),
+      ),
+    );
+
+    if (!mounted || result == null) return;
+
+    final updatedCreation = result.copyWith(id: creation.id);
+
+    setState(() {
+      _imageBytes = updatedCreation.imageBytes;
+
+      _recentCreations.removeWhere(
+        (item) => item.id == creation.id,
+      );
+
+      _recentCreations.insert(0, updatedCreation);
+    });
+
+    await _persistRecentCreations();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,36 +189,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 onOpenEditor: _openEditor,
               ),
               const SizedBox(height: 28),
-              const RecentCreationsSection(),
+              RecentCreationsSection(
+                creations: _recentCreations,
+                onCreationTap: _openRecentCreation,
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
-  Future<void> _openEditor() async {
-  if (_imageBytes == null) return;
-
-  final result = await Navigator.of(context).push<Uint8List>(
-    MaterialPageRoute(
-      builder: (_) => EditorScreen(
-        imageBytes: _imageBytes!,
-        onRemoveBackground: () async {
-          final result = await _removalService.removeBackground(
-            _imageBytes!,
-          );
-
-          return Uint8List.fromList(result);
-        },
-      ),
-    ),
-  );
-
-  if (!mounted || result == null) return;
-
-  setState(() {
-    _imageBytes = result;
-  });
-}
 }

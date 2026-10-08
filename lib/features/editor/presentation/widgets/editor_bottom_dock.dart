@@ -1,3 +1,4 @@
+import 'package:bg_remover/core/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -6,78 +7,59 @@ class EditorBottomDock extends StatelessWidget {
   const EditorBottomDock({
     required this.onBack,
     required this.onRemoveBackground,
+    required this.onSave,
     required this.onShare,
     required this.isLoading,
+    required this.hasRemovedBackground,
     super.key,
   });
 
   final VoidCallback onBack;
   final VoidCallback onRemoveBackground;
   final VoidCallback onShare;
+  final VoidCallback onSave;
   final bool isLoading;
+  final bool hasRemovedBackground;
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _DockAction(
-          icon: Icons.arrow_back,
-          label: 'Back',
-          onPressed: isLoading ? null : onBack,
+  @override
+Widget build(BuildContext context) {
+  return Row(
+  children: [
+    _DockAction(
+      icon: Icons.arrow_back,
+      label: 'Back',
+      onPressed: isLoading ? null : onBack,
+    ),
+    const SizedBox(width: 8),
+    if (!hasRemovedBackground)
+      Expanded(
+        child: GradientButton(
+          label: 'Remove Background',
+          icon: Icons.auto_fix_high,
+          onPressed: isLoading ? null : onRemoveBackground,
+          isLoading: isLoading,
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: AppTheme.primaryGradient,
-              borderRadius: AppTheme.radiusMedium,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: isLoading ? null : onRemoveBackground,
-                borderRadius: AppTheme.radiusMedium,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (isLoading)
-                        const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      else
-                        const Icon(Icons.auto_fix_high),
-                      const SizedBox(width: 8),
-                      Text(
-                        isLoading
-                            ? 'Processing...'
-                            : 'Remove Background',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+      )
+    else
+      Expanded(
+        child: GradientButton(
+          label: 'Save',
+          icon: Icons.download_outlined,
+          onPressed: isLoading ? null : onSave,
         ),
-        const SizedBox(width: 10),
-        _DockAction(
-          icon: Icons.share_outlined,
-          label: 'Share',
-          onPressed: onShare,
-        ),
-      ],
-    );
-  }
+      ),
+    if (hasRemovedBackground) ...[
+      const SizedBox(width: 8),
+      _DockAction(
+        icon: Icons.share_outlined,
+        label: 'Share',
+        onPressed: isLoading ? null : onShare,
+      ),
+    ],
+  ],
+);
+}
 }
 
 class _DockAction extends StatelessWidget {
