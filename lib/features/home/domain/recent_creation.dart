@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import '../../editor/presentation/widgets/backdrop_selector.dart';

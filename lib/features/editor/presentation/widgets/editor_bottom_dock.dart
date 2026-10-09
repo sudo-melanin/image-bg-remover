@@ -23,43 +23,43 @@ class EditorBottomDock extends StatelessWidget {
 
   @override
   @override
-Widget build(BuildContext context) {
-  return Row(
-  children: [
-    _DockAction(
-      icon: Icons.arrow_back,
-      label: 'Back',
-      onPressed: isLoading ? null : onBack,
-    ),
-    const SizedBox(width: 8),
-    if (!hasRemovedBackground)
-      Expanded(
-        child: GradientButton(
-          label: 'Remove Background',
-          icon: Icons.auto_fix_high,
-          onPressed: isLoading ? null : onRemoveBackground,
-          isLoading: isLoading,
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _DockAction(
+          icon: Icons.arrow_back,
+          label: 'Back',
+          onPressed: isLoading ? null : onBack,
         ),
-      )
-    else
-      Expanded(
-        child: GradientButton(
-          label: 'Save',
-          icon: Icons.download_outlined,
-          onPressed: isLoading ? null : onSave,
-        ),
-      ),
-    if (hasRemovedBackground) ...[
-      const SizedBox(width: 8),
-      _DockAction(
-        icon: Icons.share_outlined,
-        label: 'Share',
-        onPressed: isLoading ? null : onShare,
-      ),
-    ],
-  ],
-);
-}
+        const SizedBox(width: 8),
+        if (!hasRemovedBackground)
+          Expanded(
+            child: GradientButton(
+              label: 'Remove Background',
+              icon: Icons.auto_fix_high,
+              onPressed: isLoading ? null : onRemoveBackground,
+              isLoading: isLoading,
+            ),
+          )
+        else
+          Expanded(
+            child: GradientButton(
+              label: 'Save',
+              icon: Icons.download_outlined,
+              onPressed: isLoading ? null : onSave,
+            ),
+          ),
+        if (hasRemovedBackground) ...[
+          const SizedBox(width: 8),
+          _DockAction(
+            icon: Icons.share_outlined,
+            label: 'Share',
+            onPressed: isLoading ? null : onShare,
+          ),
+        ],
+      ],
+    );
+  }
 }
 
 class _DockAction extends StatelessWidget {
@@ -85,22 +85,14 @@ class _DockAction extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppTheme.surfaceCard,
               borderRadius: AppTheme.radiusSmall,
-              border: Border.all(
-                color: AppTheme.surfaceBorder,
-              ),
+              border: Border.all(color: AppTheme.surfaceBorder),
             ),
-            child: IconButton(
-              onPressed: onPressed,
-              icon: Icon(icon, size: 19),
-            ),
+            child: IconButton(onPressed: onPressed, icon: Icon(icon, size: 19)),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 10,
-              color: AppTheme.textSecondary,
-            ),
+            style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
           ),
         ],
       ),

@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 
 class CheckerboardBackground extends StatelessWidget {
-  const CheckerboardBackground({
-    super.key,
-    this.child,
-  });
+  const CheckerboardBackground({super.key, this.child});
 
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _CheckerboardPainter(),
-      child: child,
-    );
+    return CustomPaint(painter: _CheckerboardPainter(), child: child);
   }
 }
 

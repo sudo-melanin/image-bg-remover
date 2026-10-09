@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -74,12 +73,7 @@ class _EditorScreenState extends State<EditorScreen> {
       final paint = Paint()..color = backdrop;
 
       canvas.drawRect(
-        Rect.fromLTWH(
-          0,
-          0,
-          image.width.toDouble(),
-          image.height.toDouble(),
-        ),
+        Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
         paint,
       );
     }
@@ -87,10 +81,7 @@ class _EditorScreenState extends State<EditorScreen> {
     canvas.drawImage(image, Offset.zero, Paint());
 
     final picture = recorder.endRecording();
-    final outputImage = await picture.toImage(
-      image.width,
-      image.height,
-    );
+    final outputImage = await picture.toImage(image.width, image.height);
 
     final byteData = await outputImage.toByteData(
       format: ui.ImageByteFormat.png,
@@ -124,14 +115,12 @@ class _EditorScreenState extends State<EditorScreen> {
           ),
         ),
       );
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not save the image.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 
@@ -143,9 +132,7 @@ class _EditorScreenState extends State<EditorScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not share the image.'),
-        ),
+        const SnackBar(content: Text('Could not share the image.')),
       );
     }
   }
@@ -164,12 +151,14 @@ class _EditorScreenState extends State<EditorScreen> {
         _imageBytes = result;
         _hasRemovedBackground = true;
       });
-    } catch (_) {
+    } catch (error) {
+      debugPrint('Background removal error: $error');
+
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Could not remove the background.'),
+          content: Text('Could not remove the background. Please try again.'),
         ),
       );
     } finally {
@@ -200,9 +189,7 @@ class _EditorScreenState extends State<EditorScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not prepare the image.'),
-        ),
+        const SnackBar(content: Text('Could not prepare the image.')),
       );
     }
   }
@@ -249,9 +236,7 @@ class _EditorScreenState extends State<EditorScreen> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: AppTheme.radiusLarge,
-                    border: Border.all(
-                      color: AppTheme.surfaceBorder,
-                    ),
+                    border: Border.all(color: AppTheme.surfaceBorder),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: _solidBackdrop == null

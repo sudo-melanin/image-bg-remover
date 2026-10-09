@@ -29,10 +29,7 @@ class GradientButton extends StatelessWidget {
           onTap: isLoading ? null : onPressed,
           borderRadius: AppTheme.radiusMedium,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 16,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

@@ -24,12 +24,12 @@ class BackgroundRemovalService {
       ),
     );
 
-    final response = await request.send();
+    final response = await request.send().timeout(const Duration(seconds: 60));
 
     if (response.statusCode != 200) {
-      throw Exception(
-        'Background removal failed (${response.statusCode}).',
-      );
+      final errorBody = await response.stream.bytesToString();
+
+      throw Exception('HTTP ${response.statusCode}: $errorBody');
     }
 
     return response.stream.toBytes();

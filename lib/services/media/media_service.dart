@@ -16,15 +16,8 @@ class MediaService {
   Future<void> shareImage(Uint8List imageBytes) async {
     await SharePlus.instance.share(
       ShareParams(
-        files: [
-          XFile.fromData(
-            imageBytes,
-            mimeType: 'image/png',
-          ),
-        ],
-        fileNameOverrides: [
-          'background_removed.png',
-        ],
+        files: [XFile.fromData(imageBytes, mimeType: 'image/png')],
+        fileNameOverrides: ['background_removed.png'],
       ),
     );
   }

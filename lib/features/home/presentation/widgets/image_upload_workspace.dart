@@ -25,14 +25,10 @@ class ImageUploadWorkspace extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.surfaceCard,
         borderRadius: AppTheme.radiusLarge,
-        border: Border.all(
-          color: AppTheme.surfaceBorder,
-        ),
+        border: Border.all(color: AppTheme.surfaceBorder),
       ),
       child: imageBytes == null
-          ? _EmptyState(
-              onPickImage: onPickImage,
-            )
+          ? _EmptyState(onPickImage: onPickImage)
           : _SelectedState(
               imageBytes: imageBytes!,
               onPickImage: onPickImage,
@@ -43,9 +39,7 @@ class ImageUploadWorkspace extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({
-    required this.onPickImage,
-  });
+  const _EmptyState({required this.onPickImage});
 
   final VoidCallback onPickImage;
 
@@ -69,18 +63,13 @@ class _EmptyState extends StatelessWidget {
         const SizedBox(height: 18),
         const Text(
           'Select an image to start',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 6),
         const Text(
           'Choose a photo from your device gallery.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: AppTheme.textSecondary,
-          ),
+          style: TextStyle(color: AppTheme.textSecondary),
         ),
         const SizedBox(height: 20),
         SizedBox(
@@ -117,10 +106,7 @@ class _SelectedState extends StatelessWidget {
             aspectRatio: 1,
             child: Container(
               color: AppTheme.surfaceElevated,
-              child: Image.memory(
-                imageBytes,
-                fit: BoxFit.contain,
-              ),
+              child: Image.memory(imageBytes, fit: BoxFit.contain),
             ),
           ),
         ),

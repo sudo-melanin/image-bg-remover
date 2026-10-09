@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 
-enum EditorBackdrop {
-  checkerboard,
-  white,
-  dark,
-  green,
-}
+enum EditorBackdrop { checkerboard, white, dark, green }
 
 class BackdropSelector extends StatelessWidget {
   const BackdropSelector({
@@ -38,27 +33,21 @@ class BackdropSelector extends StatelessWidget {
             backdrop: EditorBackdrop.white,
             selected: selected,
             onChanged: onChanged,
-            child: const ColoredBox(
-              color: Colors.white,
-            ),
+            child: const ColoredBox(color: Colors.white),
           ),
           _BackdropOption(
             label: 'Dark',
             backdrop: EditorBackdrop.dark,
             selected: selected,
             onChanged: onChanged,
-            child: const ColoredBox(
-              color: Color(0xFF111827),
-            ),
+            child: const ColoredBox(color: Color(0xFF111827)),
           ),
           _BackdropOption(
             label: 'Green',
             backdrop: EditorBackdrop.green,
             selected: selected,
             onChanged: onChanged,
-            child: const ColoredBox(
-              color: Color(0xFF22C55E),
-            ),
+            child: const ColoredBox(color: Color(0xFF22C55E)),
           ),
         ],
       ),
@@ -114,9 +103,7 @@ class _BackdropOption extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 11,
-                color: isSelected
-                    ? AppTheme.textPrimary
-                    : AppTheme.textMuted,
+                color: isSelected ? AppTheme.textPrimary : AppTheme.textMuted,
               ),
             ),
           ],
@@ -131,9 +118,7 @@ class _CheckerPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _MiniCheckerPainter(),
-    );
+    return CustomPaint(painter: _MiniCheckerPainter());
   }
 }
 

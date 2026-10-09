@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,9 +10,7 @@ class RecentCreationsStorage {
   Future<Directory> _getStorageDirectory() async {
     final appDirectory = await getApplicationDocumentsDirectory();
 
-    final directory = Directory(
-      '${appDirectory.path}/recent_creations',
-    );
+    final directory = Directory('${appDirectory.path}/recent_creations');
 
     if (!await directory.exists()) {
       await directory.create(recursive: true);
@@ -33,9 +30,7 @@ class RecentCreationsStorage {
     final decoded = jsonDecode(await indexFile.readAsString());
 
     if (decoded is! List) {
-      throw const FormatException(
-        'Invalid recent creations index.',
-      );
+      throw const FormatException('Invalid recent creations index.');
     }
 
     final creations = <RecentCreation>[];
@@ -48,15 +43,10 @@ class RecentCreationsStorage {
 
       if (id == null || id.isEmpty) continue;
 
-      final sourceFile = File(
-        '${directory.path}/${id}_source.png',
-      );
-      final previewFile = File(
-        '${directory.path}/${id}_preview.png',
-      );
+      final sourceFile = File('${directory.path}/${id}_source.png');
+      final previewFile = File('${directory.path}/${id}_preview.png');
 
-      if (!await sourceFile.exists() ||
-          !await previewFile.exists()) {
+      if (!await sourceFile.exists() || !await previewFile.exists()) {
         continue;
       }
 
@@ -78,9 +68,41 @@ class RecentCreationsStorage {
     return creations;
   }
 
-  Future<List<RecentCreation>> saveAll(
-    List<RecentCreation> creations,
-  ) async {
+  Future<void> deleteCreation(String id) async {
+    if (id.isEmpty) {
+      throw ArgumentError('Creation ID cannot be empty.');
+    }
+
+    final directory = await _getStorageDirectory();
+    final indexFile = File('${directory.path}/index.json');
+
+    if (await indexFile.exists()) {
+      final decoded = jsonDecode(await indexFile.readAsString());
+
+      if (decoded is! List) {
+        throw const FormatException('Invalid recent creations index.');
+      }
+
+      final remainingEntries = decoded.where((entry) {
+        return entry is! Map || entry['id'] != id;
+      }).toList();
+
+      await indexFile.writeAsString(jsonEncode(remainingEntries), flush: true);
+    }
+
+    final sourceFile = File('${directory.path}/${id}_source.png');
+    final previewFile = File('${directory.path}/${id}_preview.png');
+
+    if (await sourceFile.exists()) {
+      await sourceFile.delete();
+    }
+
+    if (await previewFile.exists()) {
+      await previewFile.delete();
+    }
+  }
+
+  Future<List<RecentCreation>> saveAll(List<RecentCreation> creations) async {
     final directory = await _getStorageDirectory();
     final savedCreations = <RecentCreation>[];
     final metadata = <Map<String, String>>[];
@@ -94,37 +116,21 @@ class RecentCreationsStorage {
 
       final savedCreation = creation.copyWith(id: id);
 
-      final sourceFile = File(
-        '${directory.path}/${id}_source.png',
-      );
-      final previewFile = File(
-        '${directory.path}/${id}_preview.png',
-      );
+      final sourceFile = File('${directory.path}/${id}_source.png');
+      final previewFile = File('${directory.path}/${id}_preview.png');
 
-      await sourceFile.writeAsBytes(
-        savedCreation.imageBytes,
-        flush: true,
-      );
+      await sourceFile.writeAsBytes(savedCreation.imageBytes, flush: true);
 
-      await previewFile.writeAsBytes(
-        savedCreation.previewBytes,
-        flush: true,
-      );
+      await previewFile.writeAsBytes(savedCreation.previewBytes, flush: true);
 
       savedCreations.add(savedCreation);
 
-      metadata.add({
-        'id': id,
-        'backdrop': savedCreation.backdrop.name,
-      });
+      metadata.add({'id': id, 'backdrop': savedCreation.backdrop.name});
     }
 
     final indexFile = File('${directory.path}/index.json');
 
-    await indexFile.writeAsString(
-      jsonEncode(metadata),
-      flush: true,
-    );
+    await indexFile.writeAsString(jsonEncode(metadata), flush: true);
 
     return savedCreations;
   }

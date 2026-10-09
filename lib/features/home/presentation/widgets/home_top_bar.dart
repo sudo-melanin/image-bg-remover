@@ -16,10 +16,7 @@ class HomeTopBar extends StatelessWidget {
             gradient: AppTheme.primaryGradient,
             borderRadius: AppTheme.radiusSmall,
           ),
-          child: const Icon(
-            Icons.auto_fix_high,
-            color: Colors.white,
-          ),
+          child: const Icon(Icons.auto_fix_high, color: Colors.white),
         ),
         const SizedBox(width: 12),
         const Expanded(
@@ -28,17 +25,11 @@ class HomeTopBar extends StatelessWidget {
             children: [
               Text(
                 'AI Background',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
               ),
               Text(
                 'Remover Pro',
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
               ),
             ],
           ),
@@ -54,9 +45,7 @@ class HomeTopBar extends StatelessWidget {
 }
 
 class _TopBarAction extends StatelessWidget {
-  const _TopBarAction({
-    required this.icon,
-  });
+  const _TopBarAction({required this.icon});
 
   final IconData icon;
 
@@ -68,15 +57,9 @@ class _TopBarAction extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.surfaceCard,
         borderRadius: AppTheme.radiusSmall,
-        border: Border.all(
-          color: AppTheme.surfaceBorder,
-        ),
+        border: Border.all(color: AppTheme.surfaceBorder),
       ),
-      child: Icon(
-        icon,
-        size: 19,
-        color: AppTheme.textSecondary,
-      ),
+      child: Icon(icon, size: 19, color: AppTheme.textSecondary),
     );
   }
 }

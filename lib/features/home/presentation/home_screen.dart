@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -23,11 +22,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ImagePicker _imagePicker = ImagePicker();
 
-  final BackgroundRemovalService _removalService =
-      BackgroundRemovalService();
+  final BackgroundRemovalService _removalService = BackgroundRemovalService();
 
-  final RecentCreationsStorage _storage =
-      RecentCreationsStorage();
+  final RecentCreationsStorage _storage = RecentCreationsStorage();
 
   final List<RecentCreation> _recentCreations = [];
 
@@ -54,9 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not load recent creations.'),
-        ),
+        const SnackBar(content: Text('Could not load recent creations.')),
       );
     }
   }
@@ -79,18 +74,70 @@ class _HomeScreenState extends State<HomeScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Could not save recent creations on this device.',
-          ),
+          content: Text('Could not save recent creations on this device.'),
         ),
       );
     }
   }
 
-  Future<void> _pickImage() async {
-    final image = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
+  Future<void> _confirmDeleteCreation(RecentCreation creation) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete recent creation?'),
+          content: const Text(
+            'This will remove the image from Recent Creations '
+            'on this device. Images already saved to your gallery '
+            'will not be deleted.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
     );
+
+    // Dismissing the dialog or choosing Cancel does nothing.
+    if (shouldDelete != true || !mounted) return;
+
+    try {
+      await _storage.deleteCreation(creation.id);
+
+      if (!mounted) return;
+
+      setState(() {
+        _recentCreations.removeWhere((item) => item.id == creation.id);
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Recent creation deleted.')));
+    } catch (error) {
+      debugPrint('Could not delete recent creation: $error');
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not delete the recent creation.')),
+      );
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final image = await _imagePicker.pickImage(source: ImageSource.gallery);
 
     if (image == null) return;
 
@@ -113,9 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => EditorScreen(
           imageBytes: originalBytes,
           onRemoveBackground: () async {
-            final bytes = await _removalService.removeBackground(
-              originalBytes,
-            );
+            final bytes = await _removalService.removeBackground(originalBytes);
 
             return Uint8List.fromList(bytes);
           },
@@ -133,9 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await _persistRecentCreations();
   }
 
-  Future<void> _openRecentCreation(
-    RecentCreation creation,
-  ) async {
+  Future<void> _openRecentCreation(RecentCreation creation) async {
     final result = await Navigator.of(context).push<RecentCreation>(
       MaterialPageRoute(
         builder: (_) => EditorScreen(
@@ -160,9 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _imageBytes = updatedCreation.imageBytes;
 
-      _recentCreations.removeWhere(
-        (item) => item.id == creation.id,
-      );
+      _recentCreations.removeWhere((item) => item.id == creation.id);
 
       _recentCreations.insert(0, updatedCreation);
     });
@@ -192,6 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
               RecentCreationsSection(
                 creations: _recentCreations,
                 onCreationTap: _openRecentCreation,
+                onDeleteCreation: _confirmDeleteCreation,
               ),
             ],
           ),

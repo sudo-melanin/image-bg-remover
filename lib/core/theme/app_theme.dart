@@ -10,10 +10,7 @@ class AppTheme {
   static const Color primaryPurple = Color(0xFF7C3AED);
 
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [
-      Color(0xFF6366F1),
-      Color(0xFFA855F7),
-    ],
+    colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
@@ -34,10 +31,7 @@ class AppTheme {
         primary: primaryBlue,
         surface: surfaceCard,
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: background,
-        elevation: 0,
-      ),
+      appBarTheme: const AppBarTheme(backgroundColor: background, elevation: 0),
     );
   }
 }
